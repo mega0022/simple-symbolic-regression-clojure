@@ -1,5 +1,6 @@
 (ns simple-symbolic-regression-clojure.interpreter
   (:use [clojure.math.numeric-tower])
+  (:require [clojure.core.reducers :as r])
   )
 
 ;;; Interpreter

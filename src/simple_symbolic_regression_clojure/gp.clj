@@ -65,10 +65,10 @@
 
 
 (defn set-score [individual score]
-  (assoc individual :score score))
+  (assoc individual :score (future score)))
 
 (defn get-score [individual]
-  (:score individual))
+  (deref (:score individual)))
 
 
 ;;; Generating random scripts, individuals, etc.
@@ -106,7 +106,7 @@
 (defn score-population
   "takes an unscored population and returns the same ones with scores assigned"
   [population rubrics]
-  (map #(score-using-rubrics % rubrics) population))
+  (pmap #(score-using-rubrics % rubrics) population))
 
 
 ;;; Main evolutionary loop
