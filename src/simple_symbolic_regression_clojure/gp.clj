@@ -64,11 +64,12 @@
    (->Individual script score)))
 
 
-(defn set-score [individual score]
-  (assoc individual :score score))
+(defn set-score [individual scoreAgent]
+  (assoc individual :score scoreAgent))
+
 
 (defn get-score [individual]
-  (:score individual))
+  (when-not (deref (:score individual)) (await (:score individual))) (deref (:score individual)))
 
 
 ;;; Generating random scripts, individuals, etc.
@@ -99,8 +100,9 @@
 (defn score-using-rubrics
   "assigns the score value of an Individual by invoking `total-score-on` a set of Rubrics"
   [individual rubrics]
-  (set-score individual (total-score-on (:script individual) rubrics))
-  )
+  (let [scoreAgent (agent nil)]
+  (set-score individual (send scoreAgent total-score-on (:script individual) rubrics))
+  ))
 
 
 (defn score-population
@@ -115,7 +117,7 @@
 ; TODO: This is too problem specific and should be in core not in gp,
 ; which will require making it an argument to make-baby?
 (def token-generator
-  ['(rand-int 100) :x :+ :- :* :÷])
+  ['(rand-int 100) :x :+ :- :* :÷ :swap])
 
 
 (defn make-unscored-baby

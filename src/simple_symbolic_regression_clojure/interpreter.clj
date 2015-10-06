@@ -4,6 +4,10 @@
 
 ;;; Interpreter
 
+(defn swap
+  [x y]
+  [y x])
+
 (defn translate-op [op]
   "Translate operators from the symbolic regression language to
    the appropriate Clojure operator for evaluation. A key goal
@@ -14,6 +18,7 @@
     :- -'
     :* *'
     :÷ /
+    :swap swap
     op))
 
 (defn legal-division-stack? [stack]
@@ -24,18 +29,24 @@
        (or (not (= op :÷))
            (legal-division-stack? stack))))
 
+(defn add-values-to-stack [stack values]
+  (if (sequential? values)
+    (vec (concat values stack))
+    (conj stack values)
+    ))
+
 (defn process-binary-operator [op stack]
   "Apply a binary operator to the given stack, returning the updated stack"
   (if (legal-binary-op-stack? op stack)
     (let [arg2 (peek stack)
           arg1 (peek (pop stack))
           new-stack (pop (pop stack))]
-      (conj new-stack
+      (add-values-to-stack new-stack
             ((translate-op op) arg1 arg2)))
     stack))
 
 (defn binary-operator? [token]
-  (contains? #{:+ :- :* :÷} token))
+  (contains? #{:+ :- :* :÷ :swap} token))
 
 ; We might consider throwing an exception in the :else
 ; case instead of returning to help alert (human) programmers
@@ -74,5 +85,5 @@
     (abs (- (:output rubric) result))
     score-penalty))
 
-(defn total-score-on [script rubrics]
+(defn total-score-on [_ script rubrics]
   (reduce + (map (partial score-on script) rubrics)))
